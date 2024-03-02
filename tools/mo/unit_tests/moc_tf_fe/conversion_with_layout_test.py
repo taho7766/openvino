@@ -13,8 +13,10 @@ from openvino.runtime import PartialShape, Dimension
 from openvino.tools.mo.convert import convert_model
 from openvino.tools.mo.utils.error import Error
 
+"""
+Test cases may be outdated
+"""
 
-@generator
 class TestConversionWithBatchAndLayout(unittest.TestCase):
     def basic_check(self, model_name: str, batch: int, layout: str, refs_shapes: dict):
         path = os.path.dirname(__file__)
@@ -45,53 +47,103 @@ class TestConversionWithBatchAndLayout(unittest.TestCase):
         flag, msg = compare_functions(ov_model, ref_model, compare_tensor_names=False)
         assert flag, msg
 
-    @generate(
-        *[
+    # @generate(
+    #     *[
+    #         (
+    #                 "model_fp32.pbtxt", 5, "in1:0(cn),in2:0(cn)",
+    #                 {"in1:0": PartialShape([2, 5]), "in2:0": PartialShape([2, 5])},
+    #         ),
+    #         (
+    #                 "model_fp32.pbtxt", 9, "in1:0(nc),in2:0(nc)",
+    #                 {"in1:0": PartialShape([9, 2]), "in2:0": PartialShape([9, 2])},
+    #         ),
+    #         (
+    #                 "model_fp32.pbtxt", 7, "in1:0(?c),in2:0(?c)",
+    #                 {"in1:0": PartialShape([2, 2]), "in2:0": PartialShape([2, 2])},
+    #         ),
+    #     ],
+    # )
+    # def test_basic_model_with_layout(self, model_name: str, batch: int, layout: str, refs_shapes: dict):
+    #     self.basic_check(model_name, batch, layout, refs_shapes)
+    def test_basic_model_with_layout(self):
+        test_cases = [
             (
-                    "model_fp32.pbtxt", 5, "in1:0(cn),in2:0(cn)",
-                    {"in1:0": PartialShape([2, 5]), "in2:0": PartialShape([2, 5])},
+                "model_fp32.pbtxt", 5, "in1:0(cn),in2:0(cn)",
+                {"in1:0": PartialShape([2, 5]), "in2:0": PartialShape([2, 5])},
             ),
             (
-                    "model_fp32.pbtxt", 9, "in1:0(nc),in2:0(nc)",
-                    {"in1:0": PartialShape([9, 2]), "in2:0": PartialShape([9, 2])},
+                "model_fp32.pbtxt", 9, "in1:0(nc),in2:0(nc)",
+                {"in1:0": PartialShape([9, 2]), "in2:0": PartialShape([9, 2])},
             ),
             (
-                    "model_fp32.pbtxt", 7, "in1:0(?c),in2:0(?c)",
-                    {"in1:0": PartialShape([2, 2]), "in2:0": PartialShape([2, 2])},
+                "model_fp32.pbtxt", 7, "in1:0(?c),in2:0(?c)",
+                 {"in1:0": PartialShape([2, 2]), "in2:0": PartialShape([2, 2])},
             ),
-        ],
-    )
-    def test_basic_model_with_layout(self, model_name: str, batch: int, layout: str, refs_shapes: dict):
-        self.basic_check(model_name, batch, layout, refs_shapes)
+        ]
+        for model_name, batch, layout, refs_shape in test_cases:
+            with self.subTest(model_name=model_name, batch=batch, layout=layout, refs_shape=refs_shape):
+                self.basic_check(model_name, batch, layout, refs_shape)
 
-    @generate(
-        *[
+    # @generate(
+    #     *[
+    #         (
+    #                 "model_with_convolution_dynamic_rank.pbtxt", 7, "x:0(n???),kernel:0(????)",
+    #                 {"x:0": PartialShape([7, Dimension.dynamic(), Dimension.dynamic(), 3]),
+    #                  "kernel:0": PartialShape([2, 2, 3, 1])},
+    #         ),
+    #         (
+    #                 "model_with_convolution_dynamic_rank.pbtxt", 3, "x:0(???n),kernel:0(??n?)",
+    #                 {"x:0": PartialShape([Dimension.dynamic(), Dimension.dynamic(), Dimension.dynamic(), 3]),
+    #                  "kernel:0": PartialShape([2, 2, 3, 1])},
+    #         ),
+    #     ],
+    # )
+    # def test_model_with_convolution_dynamic_rank(self, model_name: str, batch: int, layout: str, refs_shapes: dict):
+    #     self.basic_check(model_name, batch, layout, refs_shapes)
+    
+    def test_model_with_convolution_dynamic_rank(self):
+        test_cases = [
             (
-                    "model_with_convolution_dynamic_rank.pbtxt", 7, "x:0(n???),kernel:0(????)",
-                    {"x:0": PartialShape([7, Dimension.dynamic(), Dimension.dynamic(), 3]),
-                     "kernel:0": PartialShape([2, 2, 3, 1])},
+                "model_with_convolution_dynamic_rank.pbtxt", 7, "x:0(n???),kernel:0(????)",
+                {"x:0": PartialShape([7, Dimension.dynamic(), Dimension.dynamic(), 3]),
+                 "kernel:0": PartialShape([2, 2, 3, 1])},
             ),
             (
-                    "model_with_convolution_dynamic_rank.pbtxt", 3, "x:0(???n),kernel:0(??n?)",
-                    {"x:0": PartialShape([Dimension.dynamic(), Dimension.dynamic(), Dimension.dynamic(), 3]),
-                     "kernel:0": PartialShape([2, 2, 3, 1])},
+                 "model_with_convolution_dynamic_rank.pbtxt", 3, "x:0(???n),kernel:0(??n?)",
+                 {"x:0": PartialShape([Dimension.dynamic(), Dimension.dynamic(), Dimension.dynamic(), 3]),
+                  "kernel:0": PartialShape([2, 2, 3, 1])},
             ),
-        ],
-    )
-    def test_model_with_convolution_dynamic_rank(self, model_name: str, batch: int, layout: str, refs_shapes: dict):
-        self.basic_check(model_name, batch, layout, refs_shapes)
+        ]
+        for model_name, batch, layout, refs_shape in test_cases:
+            with self.subTest(model_name=model_name, batch=batch, layout=layout, refs_shape=refs_shape):
+                self.basic_check(model_name, batch, layout, refs_shape)
+            
 
-    @generate(
-        *[
-            (
-                    "model_fp32.pbtxt", 17, "",
-                    {},
-            ),
-        ],
-    )
-    def test_model_expected_failure(self, model_name: str, batch: int, layout: str, refs_shapes: dict):
+    # @generate(
+    #     *[
+    #         (
+    #                 "model_fp32.pbtxt", 17, "",
+    #                 {},
+    #         ),
+    #     ],
+    # )
+    # def test_model_expected_failure(self, model_name: str, batch: int, layout: str, refs_shapes: dict):
+    #     # try to override batch size by default index (without specifying layout)
+    #     with self.assertRaisesRegex(Error,
+    #                                 "When you use -b \(--batch\) option, Model Optimizer applies its value to the first "
+    #                                 "element of the shape if it is equal to -1, 0 or 1\."):
+    #         self.basic_check(model_name, batch, layout, refs_shapes)
+    def test_model_expected_failure(self):
         # try to override batch size by default index (without specifying layout)
-        with self.assertRaisesRegex(Error,
-                                    "When you use -b \(--batch\) option, Model Optimizer applies its value to the first "
-                                    "element of the shape if it is equal to -1, 0 or 1\."):
-            self.basic_check(model_name, batch, layout, refs_shapes)
+        test_cases = [
+            (
+                "model_fp32.pbtxt", 17, "",
+                {},
+            ),
+        ]
+        for model_name, batch, layout, refs_shape in test_cases:
+            with self.subTest(model_name=model_name, batch=batch, layout=layout, refs_shape=refs_shape):
+                with self.assertRaisesRegex(Error,
+                                            "When you use -b \(--batch\) option, Model Optimizer applies its value to the first "
+                                            "element of the shape if it is equal to -1, 0 or 1\."):
+                    self.basic_check(model_name, batch, layout, refs_shape)
